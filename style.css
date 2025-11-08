@@ -401,8 +401,9 @@ form button:hover {
 }
 
 .carousel-slide .btn-cart {
-  display: inline-block;
-  margin: 0 15px 15px 15px;
+  display: block;
+  margin: 0 auto 15px auto;
+  width: fit-content;
 }
 
 /* Flechas de navegación */
