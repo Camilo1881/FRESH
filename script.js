@@ -86,8 +86,10 @@ function initCatalogFilters() {
     });
   });
 
-  showCarousel("todos");
-  buttons[0]?.classList.add("is-active");
+  // NO mostrar ningún carrusel por defecto, esperar que el usuario seleccione
+  carousels.forEach(carousel => {
+    carousel.style.display = "none";
+  });
 }
 
 // ====== CARRUSELES DEL CATÁLOGO (MEJORADO) ====== //
