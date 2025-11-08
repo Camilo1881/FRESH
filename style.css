@@ -165,51 +165,42 @@ nav {
     transition: all 0.3s ease;
 }
 
-.filtros button:hover,
-.filtros .is-active {
+.filtros button:hover {
     background: #c0392b;
     color: #fff;
     border-color: #c0392b;
 }
 
-.productos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+.filtros button.is-active {
+    background: #c0392b;
+    color: #fff;
+    border-color: #c0392b;
 }
 
-.producto {
-    background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    text-align: center;
-    padding: 1rem;
-    transition: all 0.3s ease;
+.catalog-carousel {
+    margin-top: 30px;
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-.producto.visible {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.producto:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.producto img {
+.catalog-carousel .carousel-container {
+    position: relative;
     max-width: 100%;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    margin: 0 auto;
+    padding: 0 60px;
 }
 
-.producto h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    color: #333;
+.catalog-carousel .carousel-track-container {
+    overflow: hidden;
+    width: 100%;
+}
+
+.catalog-carousel .carousel-track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.5s ease;
+    width: fit-content;
 }
 
 /* Estilos para los precios */
@@ -220,6 +211,8 @@ nav {
     color: #25D366;
     margin: 0.5rem 0;
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-align: center;
+    display: block;
 }
 
 .btn-cart {
@@ -233,6 +226,9 @@ nav {
     display: inline-block;
     user-select: none;
     margin-top: 0.5rem;
+    border: none;
+    font-size: 0.9rem;
+    font-family: inherit;
 }
 
 .btn-cart:hover {
@@ -322,7 +318,7 @@ form button:hover {
     background: #a93226;
 }
 
-/* ====== CARRUSEL INFINITO ====== */
+/* ====== CARRUSEL INFINITO (DESTACADOS) ====== */
 .destacados {
   text-align: center;
   padding: 50px 20px;
@@ -351,8 +347,15 @@ form button:hover {
 .carousel-track {
   display: flex;
   gap: 20px;
-  animation: scroll 30s linear infinite;
   width: fit-content;
+}
+
+.destacados .carousel-track {
+  animation: scroll 30s linear infinite;
+}
+
+#catalogo .carousel-track {
+  animation: none !important;
 }
 
 @keyframes scroll {
@@ -407,27 +410,40 @@ form button:hover {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   border: none;
-  width: 45px;
-  height: 45px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
   color: #c0392b;
-  font-size: 24px;
-  font-weight: bold;
+}
+
+.carousel-arrow svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
 }
 
 .carousel-arrow:hover {
   background: #c0392b;
   color: white;
-  transform: translateY(-50%) scale(1.1);
+  transform: translateY(-50%) scale(1.15);
+  box-shadow: 0 6px 20px rgba(192, 57, 43, 0.4);
+}
+
+.carousel-arrow:hover svg {
+  transform: scale(1.1);
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(1.05);
 }
 
 .carousel-arrow-left {
@@ -685,6 +701,20 @@ footer {
     height: 220px;
   }
 
+  .catalog-carousel .carousel-container {
+    padding: 0 45px;
+  }
+
+  .carousel-arrow {
+    width: 42px;
+    height: 42px;
+  }
+
+  .carousel-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .footer-container {
     flex-direction: column;
     text-align: center;
@@ -736,14 +766,18 @@ footer {
     height: 200px;
   }
 
+  .catalog-carousel .carousel-container {
+    padding: 0 38px;
+  }
+
   .carousel-arrow {
     width: 35px;
     height: 35px;
-    font-size: 18px;
   }
 
-  .productos {
-    grid-template-columns: 1fr;
+  .carousel-arrow svg {
+    width: 18px;
+    height: 18px;
   }
 
   .cart-panel {
