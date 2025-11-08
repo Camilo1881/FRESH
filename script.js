@@ -47,52 +47,109 @@ function initFormToWhatsApp() {
   });
 }
 
-// ====== FILTROS DE CATÁLOGO ====== //
+// ====== FILTROS DE CATÁLOGO CON TRANSICIONES ====== //
 function initCatalogFilters() {
   const filterBar = q(".filtros");
-  const products = qa(".producto");
-  if (!filterBar || !products.length) return;
+  const carousels = qa(".catalog-carousel");
+  if (!filterBar || !carousels.length) return;
 
   const buttons = qa("button", filterBar);
   if (!buttons.length) return;
 
-  let activeFilter = null;
-
-  // Ocultar todos los productos al inicio
-  products.forEach(card => card.style.display = "none");
-
-  function applyFilter(filter) {
-    products.forEach((card) => {
-      const cat = (card.getAttribute("data-category") || "").toLowerCase().trim();
-      const match = filter === "todos" || filter === cat;
-      card.style.display = match ? "block" : "none";
-      if (match) {
-        setTimeout(() => card.classList.add("visible"), 10);        
-      } else {
-        card.classList.remove("visible");
-      }
+  function showCarousel(category) {
+    carousels.forEach(carousel => {
+      carousel.style.opacity = "0";
+      carousel.style.transform = "translateY(20px)";
+      
+      setTimeout(() => {
+        const carouselCategory = carousel.getAttribute("data-category");
+        if (carouselCategory === category) {
+          carousel.style.display = "block";
+          carousel.offsetHeight;
+          carousel.style.opacity = "1";
+          carousel.style.transform = "translateY(0)";
+        } else {
+          carousel.style.display = "none";
+        }
+      }, 300);
     });
-  }
-
-  function clearFilter() {
-    products.forEach(card => card.style.display = "none");
   }
 
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const filter = (btn.getAttribute("data-filter") || btn.textContent).toLowerCase().trim();
-
-      if (activeFilter === filter) {
-        activeFilter = null;
-        buttons.forEach((b) => b.classList.remove("is-active"));
-        clearFilter();
-      } else {
-        activeFilter = filter;
-        buttons.forEach((b) => b.classList.remove("is-active"));
-        btn.classList.add("is-active");
-        applyFilter(filter);
-      }  
+      
+      buttons.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      
+      showCarousel(filter);
     });
+  });
+
+  showCarousel("todos");
+  buttons[0]?.classList.add("is-active");
+}
+
+// ====== CARRUSELES DEL CATÁLOGO (MEJORADO) ====== //
+function initCatalogCarousels() {
+  const carouselContainers = qa(".catalog-carousel");
+  
+  carouselContainers.forEach(container => {
+    const carouselInner = container.querySelector(".carousel-container");
+    if (!carouselInner) return;
+    
+    const track = carouselInner.querySelector(".carousel-track");
+    const leftArrow = carouselInner.querySelector(".carousel-arrow-left");
+    const rightArrow = carouselInner.querySelector(".carousel-arrow-right");
+    
+    if (!track || !leftArrow || !rightArrow) {
+      console.warn("Falta algún elemento del carrusel en:", container);
+      return;
+    }
+
+    let currentPosition = 0;
+    const slideWidth = 300;
+    const slidesToMove = 2;
+    
+    function updateCarousel() {
+      track.style.transform = `translateX(${currentPosition}px)`;
+    }
+
+    function moveLeft() {
+      currentPosition += slideWidth * slidesToMove;
+      if (currentPosition > 0) currentPosition = 0;
+      updateCarousel();
+    }
+
+    function moveRight() {
+      const trackWidth = track.scrollWidth;
+      const containerWidth = track.parentElement.offsetWidth;
+      const maxScroll = -(trackWidth - containerWidth);
+      
+      currentPosition -= slideWidth * slidesToMove;
+      if (currentPosition < maxScroll) currentPosition = maxScroll;
+      updateCarousel();
+    }
+
+    // Remover listeners previos si existen
+    const newLeftArrow = leftArrow.cloneNode(true);
+    const newRightArrow = rightArrow.cloneNode(true);
+    leftArrow.parentNode.replaceChild(newLeftArrow, leftArrow);
+    rightArrow.parentNode.replaceChild(newRightArrow, rightArrow);
+
+    newLeftArrow.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      moveLeft();
+    });
+
+    newRightArrow.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      moveRight();
+    });
+
+    console.log("Carrusel del catálogo inicializado:", container.getAttribute("data-category"));
   });
 }
 
@@ -116,29 +173,26 @@ function initSmoothScroll() {
   });
 }
 
-// ====== CARRUSEL INFINITO PERSONALIZADO ====== //
+// ====== CARRUSEL DESTACADOS (ESTE SÍ TIENE INFINITO) ====== //
 function initCarouselInfinito() {
   const track = document.getElementById('carouselTrack');
-  const leftArrow = document.querySelector('.carousel-arrow-left');
-  const rightArrow = document.querySelector('.carousel-arrow-right');
+  const leftArrow = document.querySelector('.destacados .carousel-arrow-left');
+  const rightArrow = document.querySelector('.destacados .carousel-arrow-right');
   
   if (!track || !leftArrow || !rightArrow) {
-    console.error('No se encontraron elementos del carrusel');
+    console.error('No se encontraron elementos del carrusel destacados');
     return;
   }
 
-  // Duplicar slides para efecto infinito
   const slides = Array.from(track.children);
   slides.forEach(slide => {
     const clone = slide.cloneNode(true);
     track.appendChild(clone);
   });
 
-  // Variables de control
   const slideWidth = 300;
   const animationDuration = 30;
 
-  // Función para mover el carrusel manualmente
   function moveCarousel(direction) {
     track.style.animationPlayState = 'paused';
     
@@ -174,7 +228,7 @@ function initCarouselInfinito() {
     moveCarousel('right');
   });
 
-  console.log('Carrusel inicializado correctamente');
+  console.log('Carrusel destacados inicializado correctamente');
 }
 
 // ====== MOSTRAR PRECIOS AUTOMÁTICAMENTE ====== //
@@ -197,12 +251,10 @@ function showPrices() {
 // ====== CARRITO MEJORADO ====== //
 let cart = [];
 
-// Función para formatear precio
 function formatPrice(price) {
   return parseFloat(price.replace(/\./g, ''));
 }
 
-// Función para mostrar precio formateado
 function displayPrice(price) {
   return `$${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 }
@@ -269,10 +321,15 @@ function removeFromCart(index) {
 window.removeFromCart = removeFromCart;
 
 function initCartButtons() {
+  // Remover listeners previos
   const buttons = qa(".btn-cart");
   
   buttons.forEach(btn => {
-    const container = btn.closest(".producto, .carousel-slide");
+    // Clonar el botón para remover listeners antiguos
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    const container = newBtn.closest(".producto, .carousel-slide");
     if (!container) return;
     
     const nameEl = container.querySelector("h3");
@@ -285,11 +342,14 @@ function initCartButtons() {
     
     const perfumeName = nameEl.textContent.trim();
     
-    btn.addEventListener("click", (e) => {
+    newBtn.addEventListener("click", (e) => {
       e.preventDefault();
+      e.stopPropagation();
       addToCart(perfumeName, price);
     });
   });
+  
+  console.log(`${buttons.length} botones de carrito inicializados`);
 }
 
 function initCheckout() {
@@ -350,12 +410,19 @@ function initCartToggle() {
 
 // ====== INICIALIZACIÓN GENERAL ======
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("Iniciando aplicación...");
+  
   initFormToWhatsApp();     
-  initCatalogFilters();     
+  initCatalogFilters();
   initSmoothScroll();       
-  initCarouselInfinito();   
-  initCartButtons();
+  initCarouselInfinito();
   initCheckout();
   initCartToggle();
-  showPrices();  // ← Muestra los precios automáticamente
+  showPrices();
+  
+  // Inicializar carruseles y botones del catálogo
+  initCatalogCarousels();
+  initCartButtons();
+  
+  console.log("Aplicación inicializada correctamente");
 });
